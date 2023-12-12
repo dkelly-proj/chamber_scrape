@@ -66,10 +66,30 @@ try:
 except:
     tv_events.append({'Chamber': 'Error', 'Date': 'Error', 'Time': 'Error', 'Event': 'Error'})
 
+## Hilliard
+url = 'https://business.hilliardchamber.org/events'
+response = requests.get(url)
+soup = BeautifulSoup(response.content, 'html.parser')
+
+hilliard_events = []
+
+try:
+    for item in soup.find_all('div', class_='card-body gz-events-card-title'):
+        chamber = 'Hilliard'
+        sdate = pd.to_datetime(str(item).split('span content="')[1].split('T')[0]).date()
+        stime = pd.to_datetime(str(item).split('span content="')[1].split('T')[1].split('"')[0]).time()
+        event = str(item).split('<a href="')[1].split('">')[1].split('</a')[0]
+    
+        hilliard_events.append({'Chamber': chamber, 'Date': sdate, 'Time': stime, 'Event': event})
+
+except:
+    hilliard_events.append({'Chamber': 'Error', 'Date': 'Error', 'Time': 'Error', 'Event': 'Error'})
+
 # Combine
 (pd.concat([pd.DataFrame(worthington_events), 
             pd.DataFrame(dublin_events),
-            pd.DataFrame(tv_events)])
+            pd.DataFrame(tv_events),
+            pd.DataFrame(hilliard_events)])
      .sort_values('Date')
      .to_csv('Chamber_Events.csv', index = False))
 
